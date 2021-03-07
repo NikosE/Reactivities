@@ -4,7 +4,6 @@ import axios from "axios";
 import { IActivity } from "../models/activity";
 import { NavBar } from "../../features/nav/NavBar";
 import { ActivityDashboard } from "../../features/activities/dashboard/ActivityDashboard";
-import { ActivityList } from "../../features/activities/dashboard/ActivityList";
 
 const App = () => {
   const [activities, setActivities] = useState<IActivity[]>([]);
@@ -15,6 +14,7 @@ const App = () => {
 
   const handleSelectActivity = (id: string) => {
     setSelectedActivity(activities.filter((a) => a.id === id)[0]);
+    SetEditMode(false);
   };
 
   const handleOpenCreateForm = () => {
@@ -37,10 +37,19 @@ const App = () => {
     SetEditMode(false);
   };
 
+  const handleDeleteActivity = (id: string) => {
+    setActivities([...activities.filter((a) => a.id !== id)]);
+  };
+
   useEffect(() => {
     axios
       .get<IActivity[]>("https://localhost:5001/activities")
       .then((response) => {
+        let activities: IActivity[] = [];
+        response.data.forEach((activity) => {
+          activity.date = activity.date.split(".")[0];
+          activities.push(activity);
+        });
         setActivities(response.data);
       });
   }, []);
@@ -58,6 +67,7 @@ const App = () => {
           setSelectedActivity={setSelectedActivity}
           createActivity={handleCreateActivity}
           editActivity={handleEditActivity}
+          deleteActivity={handleDeleteActivity}
         />
       </Container>
     </Fragment>
